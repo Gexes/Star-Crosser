@@ -20,16 +20,7 @@
                     "id": "2411921f-3931-4ffb-898d-e23eb57ef0ad",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "float",
-                    "type": "Button",
-                    "id": "e1ce0313-ac71-4a62-9496-9431224a5c2e",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
+                    "interactions": "Hold",
                     "initialStateCheck": false
                 }
             ],
@@ -108,17 +99,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Jump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "3575edb0-4bbb-4587-acd3-ff4f6e73cfdf",
-                    "path": "<Keyboard>/space",
-                    "interactions": "Hold(duration=0.4,pressPoint=1)",
-                    "processors": "",
-                    "groups": "",
-                    "action": "float",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
