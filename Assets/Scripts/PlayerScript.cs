@@ -13,6 +13,7 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] private float gravity = -9.81f;
     [SerializeField] private float gravityMultiplier = 3.0f;
     [SerializeField] private float reverseGravityMultiplier = 2.0f;
+    [SerializeField] private float modifiedGravityMultiplier = 6.0f; // Gravity when "Shift" is held
     private float _verticalVelocity;
 
     [SerializeField] private float jumpPower;
@@ -130,7 +131,7 @@ public class PlayerScript : MonoBehaviour
         _floatTimer += Time.deltaTime;
         _glideTimeRemaining -= Time.deltaTime;
 
-        // Apply upward force to counter gravity while maintaining direction based on camera
+        // Apply upward force to counter gravity maintaining direction based on camera
         if (_floatTimer < maxFloatTime)
         {
             _verticalVelocity = Mathf.Lerp(_verticalVelocity, 0, 0.1f); // Gradual floating effect
@@ -159,9 +160,12 @@ public class PlayerScript : MonoBehaviour
 
     private void ApplyGravity()
     {
+        //modified gravity only if Shift is held
+        float currentGravityMultiplier = Input.GetKey(KeyCode.LeftShift) ? modifiedGravityMultiplier : gravityMultiplier;
+
         if (!_isGrounded)
         {
-            _verticalVelocity += gravity * gravityMultiplier * Time.deltaTime;
+            _verticalVelocity += gravity * currentGravityMultiplier * Time.deltaTime;
         }
         _moveDirection.y = _verticalVelocity;
     }
