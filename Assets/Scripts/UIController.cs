@@ -17,6 +17,6 @@ public class UIController : MonoBehaviour
     // update the UI text with the current count
     private void UpdateCollectibleText()
     {
-        collectibleCountText.text = collectibleCount + "/3";
+        collectibleCountText.text = collectibleCount + "/24";
     }
 }
