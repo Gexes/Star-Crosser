@@ -36,6 +36,10 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] private float mouseSensitivity = 5f;
     private float _rotationX = 0f;
 
+    // Added variables for extra jumps and glides from power-ups
+    private int _extraJumps = 0;
+    private int _extraGlides = 0;
+
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
@@ -98,13 +102,13 @@ public class PlayerScript : MonoBehaviour
 
     private void StartJump(InputAction.CallbackContext context)
     {
-        if (_currentJumps < maxJumps)
+        if (_currentJumps < maxJumps + _extraJumps)
         {
             _verticalVelocity = jumpPower;
             _currentJumps++;
             _glideCount = 0; // Reset glides after jump
         }
-        else if (!_isGrounded && _glideCount < maxGlides)
+        else if (!_isGrounded && _glideCount < maxGlides + _extraGlides)
         {
             StartFloating();
         }
@@ -117,7 +121,7 @@ public class PlayerScript : MonoBehaviour
 
     private void StartFloating()
     {
-        if (_glideCount < maxGlides)
+        if (_glideCount < maxGlides + _extraGlides)
         {
             _isFloating = true;
             _glideTimeRemaining = glideDuration;
@@ -191,4 +195,40 @@ public class PlayerScript : MonoBehaviour
         _jumpAction.started -= StartJump;
         _jumpAction.canceled -= EndJump;
     }
+
+    // Methods to add extra jumps and glides from power-ups
+    public void AddExtraJump(int jumps)
+    {
+        _extraJumps += jumps;
+        Debug.Log("Extra jump(s) added! Total extra jumps: " + _extraJumps);
+    }
+
+    public void AddExtraGlide(int glides)
+    {
+        _extraGlides += glides;
+        Debug.Log("Extra glide(s) added! Total extra glides: " + _extraGlides);
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        // Detect power-ups upon collision with CharacterController
+        PowerUp powerUp = hit.collider.GetComponent<PowerUp>();
+        if (powerUp != null)
+        {
+            powerUp.ActivatePowerUp(_characterController);  // Pass player's CharacterController to activate power-up
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // Check if the collided object has a PowerUp component
+        PowerUp powerUp = other.GetComponent<PowerUp>();
+        if (powerUp != null)
+        {
+            // Activate the power-up, passing the player's CharacterController
+            powerUp.ActivatePowerUp(_characterController);
+            
+        }
+    }
+
 }
