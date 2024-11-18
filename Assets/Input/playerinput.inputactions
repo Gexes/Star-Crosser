@@ -20,13 +20,22 @@
                     "id": "2411921f-3931-4ffb-898d-e23eb57ef0ad",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Hold",
+                    "interactions": "",
                     "initialStateCheck": false
                 },
                 {
                     "name": "Shift",
                     "type": "Button",
                     "id": "da7ee27c-a872-47f2-81a2-c1f41bda43ec",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Glide",
+                    "type": "Button",
+                    "id": "20af30d9-1660-4916-b786-8c7ad1157932",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -93,7 +102,7 @@
                     "name": "",
                     "id": "9eb5934d-ed74-4755-99f8-d6d75e55372c",
                     "path": "<Keyboard>/space",
-                    "interactions": "",
+                    "interactions": "Hold",
                     "processors": "",
                     "groups": "",
                     "action": "Jump",
@@ -108,6 +117,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Shift",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "219e1d6f-5cc5-485f-b68b-ffbee6a6058c",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Hold",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Glide",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

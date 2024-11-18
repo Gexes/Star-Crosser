@@ -31,7 +31,13 @@ public class Checkpoint : MonoBehaviour
             {
                 playerRespawn.UpdateCheckpoint(transform.position);
             }
+
+            // Show checkpoint popup on the UI
+            UIController uiController = FindObjectOfType<UIController>();
+            if (uiController != null)
+            {
+                uiController.ShowCheckpointPopup("Checkpoint Activated!");
+            }
         }
     }
 }
-
