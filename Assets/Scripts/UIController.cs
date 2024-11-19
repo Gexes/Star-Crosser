@@ -22,7 +22,7 @@ public class UIController : MonoBehaviour
     // Update the UI text with the current count
     private void UpdateCollectibleText()
     {
-        collectibleCountText.text = collectibleCount + "/24";
+        collectibleCountText.text = collectibleCount + "/5";
     }
 
     // Display a popup message for a checkpoint
