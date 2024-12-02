@@ -18,7 +18,7 @@ public class SceneChanger : MonoBehaviour
             playerController.enabled = false;
 
             // Load the next scene (index 1 in this case)
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene(2);
 
             // Re-enable the CharacterController after a delay
             StartCoroutine(ReenableCharacterController());

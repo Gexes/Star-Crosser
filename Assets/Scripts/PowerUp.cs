@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections;
 using UnityEngine;
 
@@ -9,6 +10,16 @@ public class PowerUp : MonoBehaviour
     private Animator animator;                        // Reference to the Animator component
     private bool isRespawning = false;                // Prevent multiple respawn triggers
     private SpriteRenderer spriteRenderer;            // Reference to SpriteRenderer for hiding
+    public CinemachineVirtualCamera virtualCamera;
+
+    private void Start()
+    {
+        virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
+        if (virtualCamera == null)
+        {
+            Debug.LogError("camera not found");
+        }
+    }
 
     private void Awake()
     {
@@ -19,6 +30,15 @@ public class PowerUp : MonoBehaviour
         // Cache the Animator and SpriteRenderer components
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    void Update()
+    {
+        if (virtualCamera != null)
+        {
+            Transform cameraTransform = virtualCamera.VirtualCameraGameObject.transform;
+            transform.forward = new Vector3(cameraTransform.forward.x, cameraTransform.forward.y, cameraTransform.forward.z);
+        }
     }
 
     public void ActivatePowerUp(CharacterController playerController)
