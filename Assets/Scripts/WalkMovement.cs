@@ -195,5 +195,6 @@ public class WalkMovement : MonoBehaviour
     {
         enabled = isEnabled;
         rb.velocity = Vector3.zero; // Stop movement when disabled
+        rb.isKinematic = !isEnabled; // Disable Rigidbody physics when movement is off
     }
 }

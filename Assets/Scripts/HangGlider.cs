@@ -6,18 +6,18 @@ public class HangGlider : MonoBehaviour
     [SerializeField] private float glideSpeed = 10f;
     [SerializeField] private float descendRate = 2f;
     [SerializeField] private WalkMovement walkMovement;
-    [SerializeField] private Transform locationSpawner;
     [SerializeField] private ControlState controlState;
 
-    public bool IsGliderActive { get; private set; } = false;
     private Rigidbody rb;
+    private Transform playerTransform;
+
+    public bool IsGliderActive { get; private set; } = false;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = true;
         SetGliderVisibility(false);
-        SetControlState(walking: true, gliding: false);
     }
 
     public void ToggleGlider(bool activate)
@@ -25,12 +25,26 @@ public class HangGlider : MonoBehaviour
         if (activate == IsGliderActive) return;
 
         IsGliderActive = activate;
-        Debug.Log($"Glider toggled: {IsGliderActive}");
+        rb.isKinematic = !activate;
+        SetGliderVisibility(activate);
 
-        rb.isKinematic = !IsGliderActive;
-        SetGliderVisibility(IsGliderActive);
-        walkMovement.EnableMovement(!IsGliderActive);
-        SetControlState(walking: !IsGliderActive, gliding: IsGliderActive);
+        walkMovement.EnableMovement(!activate);
+        controlState.isWalkingEnabled = !activate;
+        controlState.isGlidingEnabled = activate;
+
+        // Attach or detach player
+        if (activate)
+        {
+            playerTransform = walkMovement.transform;
+            playerTransform.SetParent(transform); // Attach to glider
+        }
+        else
+        {
+            if (playerTransform != null)
+            {
+                playerTransform.SetParent(null); // Detach from glider
+            }
+        }
     }
 
     private void Update()
@@ -38,7 +52,6 @@ public class HangGlider : MonoBehaviour
         if (IsGliderActive)
         {
             HandleGliderMovement();
-            transform.position = locationSpawner.position;
         }
     }
 
@@ -47,25 +60,22 @@ public class HangGlider : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        Vector3 movement = transform.forward * vertical * glideSpeed * Time.deltaTime +
-                           Vector3.down * descendRate * Time.deltaTime +
-                           transform.right * horizontal * glideSpeed * Time.deltaTime;
+        // Movement forward/backward and side to side
+        Vector3 forwardMovement = transform.forward * vertical * glideSpeed * Time.deltaTime;
+        Vector3 swayMovement = transform.right * horizontal * glideSpeed * Time.deltaTime;
 
-        rb.velocity = movement;
+        // Apply gravity-like effect for descent
+        Vector3 downwardMovement = Vector3.down * descendRate * Time.deltaTime;
 
-        // Apply rotation based on horizontal input
-        float rotationSpeed = 100f;
-        transform.Rotate(Vector3.up, horizontal * rotationSpeed * Time.deltaTime);
+        // Update the Rigidbody velocity
+        rb.velocity = forwardMovement + downwardMovement + swayMovement;
     }
 
     private void SetGliderVisibility(bool isVisible)
     {
-        gameObject.GetComponent<MeshRenderer>().enabled = isVisible;
-    }
-
-    private void SetControlState(bool walking, bool gliding)
-    {
-        controlState.isWalkingEnabled = walking;
-        controlState.isGlidingEnabled = gliding;
+        foreach (MeshRenderer renderer in GetComponentsInChildren<MeshRenderer>())
+        {
+            renderer.enabled = isVisible;
+        }
     }
 }
