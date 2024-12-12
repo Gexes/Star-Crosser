@@ -7,7 +7,27 @@ public class WalkMovement : MonoBehaviour
     [Header("Movement Settings")]
     [SerializeField] private float movementSpeed = 5f;
     [SerializeField] private float jumpForce = 7f;
-    [SerializeField] private float jumpCooldown = 0.5f; // Cooldown duration for the jump input
+    [SerializeField] private float jumpCooldown = 0.5f;
+
+    [Header("Glider Turning Settings")]
+    [Range(10f, 50f)][SerializeField] private float turnSpeed = 3f; // Turning speed adjustable in the Inspector
+
+
+    [Header("Glider Settings")]
+    [SerializeField] private float glideSpeed = 10f;
+    [SerializeField] private float descendRate = 2f;
+
+    [Header("Glider Speed Settings")]
+    [SerializeField] private float accelerationRate = 5f; // How quickly the glider accelerates when W is pressed
+    [SerializeField] private float decelerationRate = 2f; // How quickly the glider decelerates when S is pressed
+    [SerializeField] private float minSpeed = 1f; // Minimum speed to prevent complete stop
+    [SerializeField] private float maxSpeed = 20f; // Maximum speed the glider can reach when accelerating
+
+
+    [Header("Glider Upward Settings")]
+    [SerializeField] private float upwardVelocityIncreaseRate = 2f; // Rate of increase for upward velocity
+    [SerializeField] private float maxUpwardVelocity = 10f;
+    private float currentUpwardVelocity = 0f; // Tracks current upward velocity
 
     [Header("Camera Settings")]
     [SerializeField] private Transform cameraTransform;
@@ -15,32 +35,51 @@ public class WalkMovement : MonoBehaviour
     [Header("Control State")]
     [SerializeField] private ControlState controlState;
 
+    [Header("Glider Component")]
+    [SerializeField] private GameObject glider; // Reference to the glider GameObject
+
     private Rigidbody rb;
     private bool isGrounded = true;
-    private bool isJumping = false; // Flag to indicate jump status
+    private bool isJumping = false;
     private Vector3 smoothVelocity;
-    private float lastJumpTime = 0f; // Time of the last jump
+    private float lastJumpTime = 0f;
 
     // Animation System
     private Animator animator;
     private string currentAnimation = "";
-
     private Vector2 movement; // Tracks player input for animations
+
+    private bool isGliderActive = false;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.constraints = RigidbodyConstraints.FreezeRotation; // Prevent tipping over
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
         animator = GetComponent<Animator>();
 
         // Lock and hide the cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        // Ensure the glider starts hidden
+        if (glider != null)
+        {
+            glider.SetActive(false);
+        }
     }
 
     private void Update()
     {
-        if (!controlState.isGlidingEnabled) // Prevent movement if gliding is enabled
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            ToggleGlider(!isGliderActive);
+        }
+
+        if (isGliderActive)
+        {
+            HandleGliderMovement();
+        }
+        else
         {
             CheckGrounded();
             HandleMovement();
@@ -48,14 +87,13 @@ public class WalkMovement : MonoBehaviour
             HandleJump();
         }
 
-        // Unlock the cursor if Escape is pressed
+        // Unlock and relock the cursor
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
 
-        // Relock the cursor if the left mouse button is pressed
         if (Cursor.lockState == CursorLockMode.None && Input.GetMouseButtonDown(0))
         {
             Cursor.lockState = CursorLockMode.Locked;
@@ -65,7 +103,6 @@ public class WalkMovement : MonoBehaviour
 
     private void CheckGrounded()
     {
-        // Simple ground check using collider's contact points or other means
         isGrounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 0.6f);
     }
 
@@ -96,7 +133,6 @@ public class WalkMovement : MonoBehaviour
             return;
         }
 
-        // Check grounded state for walking or idle animations
         if (isGrounded)
         {
             if (movement.y > 0)
@@ -124,11 +160,9 @@ public class WalkMovement : MonoBehaviour
 
     private IEnumerator CrossfadeToIdleAfterJump()
     {
-        // Wait for the "Jump Start" animation to complete
         float jumpStartDuration = animator.GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(jumpStartDuration);
 
-        // Wait until grounded
         while (!isGrounded)
         {
             yield return null;
@@ -140,33 +174,122 @@ public class WalkMovement : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (controlState.isWalkingEnabled) // Only handle movement if walking is enabled
+        float moveX = Input.GetAxis("Horizontal");
+        float moveZ = Input.GetAxis("Vertical");
+
+        movement = new Vector2(moveX, moveZ);
+
+        Vector3 forward = cameraTransform.forward;
+        Vector3 right = cameraTransform.right;
+
+        forward.y = 0f;
+        right.y = 0f;
+
+        forward.Normalize();
+        right.Normalize();
+
+        Vector3 targetDirection = forward * moveZ + right * moveX;
+
+        if (targetDirection.magnitude > 0.1f)
         {
-            float moveX = Input.GetAxis("Horizontal");
-            float moveZ = Input.GetAxis("Vertical");
+            float targetAngle = Mathf.Atan2(targetDirection.x, targetDirection.z) * Mathf.Rad2Deg;
+            float smoothedAngle = Mathf.LerpAngle(transform.eulerAngles.y, targetAngle, Time.deltaTime * 10f);
+            transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
+        }
 
-            movement = new Vector2(moveX, moveZ);
+        Vector3 desiredVelocity = targetDirection * movementSpeed;
+        rb.velocity = Vector3.SmoothDamp(rb.velocity, new Vector3(desiredVelocity.x, rb.velocity.y, desiredVelocity.z), ref smoothVelocity, 0.1f);
+    }
 
-            Vector3 forward = cameraTransform.forward;
-            Vector3 right = cameraTransform.right;
+    private void HandleGliderMovement()
+    {
+        // Disable gravity during gliding
+        rb.useGravity = false;
 
-            forward.y = 0f;
-            right.y = 0f;
+        // Read input for horizontal (A/D) and vertical (W/S) controls
+        float horizontal = Input.GetAxis("Horizontal"); // A & D for turning (yaw)
+        float vertical = Input.GetAxis("Vertical");     // W for acceleration, S for deceleration
 
-            forward.Normalize();
-            right.Normalize();
+        // Handle acceleration when W is pressed
+        if (vertical > 0) // W Key: Accelerate
+        {
+            glideSpeed += vertical * Time.deltaTime * accelerationRate;
+            glideSpeed = Mathf.Clamp(glideSpeed, minSpeed, maxSpeed); // Apply acceleration cap
+        }
+        else if (vertical < 1) // S Key: Decelerate
+        {
+            glideSpeed -= decelerationRate * Time.deltaTime;
+            glideSpeed = Mathf.Max(glideSpeed, 5f); // Ensure it doesn't decelerate below 5
+        }
+        else
+        {
+            // Decay to base value if no keys are pressed
+            glideSpeed = Mathf.Lerp(glideSpeed, minSpeed, Time.deltaTime * decelerationRate);
+        }
 
-            Vector3 targetDirection = forward * moveZ + right * moveX;
+        // Apply forward movement based on the new calculated glideSpeed
+        Vector3 forwardMovement = transform.forward * glideSpeed;
 
-            if (targetDirection.magnitude > 0.1f)
-            {
-                float targetAngle = Mathf.Atan2(targetDirection.x, targetDirection.z) * Mathf.Rad2Deg;
-                float smoothedAngle = Mathf.LerpAngle(transform.eulerAngles.y, targetAngle, Time.deltaTime * 10f);
-                transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
-            }
+        // Handle upward and downward movement separately
+        HandleUpwardMovement();
 
-            Vector3 desiredVelocity = targetDirection * movementSpeed;
-            rb.velocity = Vector3.SmoothDamp(rb.velocity, new Vector3(desiredVelocity.x, rb.velocity.y, desiredVelocity.z), ref smoothVelocity, 0.1f);
+        // Update the yaw rotation based on A/D input
+        float yawChange = horizontal * turnSpeed * Time.deltaTime; // Smooth turning
+        float newYaw = transform.eulerAngles.y + yawChange; // Add yaw change without clamping
+        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, newYaw, transform.rotation.eulerAngles.z);
+
+        // Combine forward movement with upward velocity
+        Vector3 gliderVelocity = forwardMovement + new Vector3(0f, currentUpwardVelocity - descendRate, 0f);
+
+        // Apply the combined velocity to Rigidbody
+        rb.velocity = gliderVelocity;
+
+        // Visual tilting for banking motion (Z-axis tilt)
+        float tiltAngle = horizontal * 30f; // Adjust tilt sensitivity
+        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, -tiltAngle);
+    }
+
+    private void HandleUpwardMovement()
+    {
+        if (Input.GetKey(KeyCode.Space))
+        {
+            // Increase upward velocity up to the maximum allowed
+            currentUpwardVelocity = Mathf.Min(currentUpwardVelocity + upwardVelocityIncreaseRate * Time.deltaTime, maxUpwardVelocity);
+        }
+        else
+        {
+            // Gradually reduce upward velocity when Spacebar is released
+            currentUpwardVelocity = Mathf.Max(currentUpwardVelocity - upwardVelocityIncreaseRate * Time.deltaTime, 0f);
+        }
+    }
+
+    private void ToggleGlider(bool activate)
+    {
+        if (activate == isGliderActive) return;
+
+        isGliderActive = activate;
+        controlState.isWalkingEnabled = !activate;
+        controlState.isGlidingEnabled = activate;
+
+        if (glider != null)
+        {
+            glider.SetActive(activate); // Toggle glider visibility
+        }
+
+        if (activate)
+        {
+            rb.useGravity = false;
+            rb.constraints = RigidbodyConstraints.FreezeRotationX;
+
+            ChangeAnimation("Flying");
+        }
+        else
+        {
+            rb.useGravity = true;
+            rb.constraints = RigidbodyConstraints.FreezeRotation;
+            rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+
+            ChangeAnimation("IdleStill");
         }
     }
 
@@ -189,12 +312,5 @@ public class WalkMovement : MonoBehaviour
         float jumpStartDuration = animator.GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(jumpStartDuration);
         isJumping = false;
-    }
-
-    public void EnableMovement(bool isEnabled)
-    {
-        enabled = isEnabled;
-        rb.velocity = Vector3.zero; // Stop movement when disabled
-        rb.isKinematic = !isEnabled; // Disable Rigidbody physics when movement is off
     }
 }
