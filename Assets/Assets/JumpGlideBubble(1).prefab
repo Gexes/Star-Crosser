@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 6727916535943825327}
   - component: {fileID: 6727916535943825324}
   - component: {fileID: 6727916535943825323}
-  - component: {fileID: 6727916535943825322}
   - component: {fileID: 6727916535943825325}
+  - component: {fileID: 6705467738995346471}
   m_Layer: 0
   m_Name: JumpGlideBubble(1)
   m_TagString: Untagged
@@ -100,18 +100,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 12.7152405, y: 12.195807, z: 0.14246137}
   m_Center: {x: -0.31192207, y: -1.0251651, z: -0.028769307}
---- !u!114 &6727916535943825322
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6727916535943825326}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bcaec28025744814aa74ade1a08c8fee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!95 &6727916535943825325
 Animator:
   serializedVersion: 5
@@ -132,3 +120,17 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
+--- !u!114 &6705467738995346471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6727916535943825326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcaec28025744814aa74ade1a08c8fee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  oxygenAmount: 20
+  respawnTime: 5

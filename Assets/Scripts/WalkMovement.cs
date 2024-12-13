@@ -5,12 +5,12 @@ using UnityEngine;
 public class WalkMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
-    [SerializeField] private float movementSpeed = 5f;
-    [SerializeField] private float jumpForce = 7f;
-    [SerializeField] private float jumpCooldown = 0.5f;
+    [SerializeField] private float movementSpeed = 5f; // Walk speed
+    [SerializeField] private float jumpForce = 7f; //Jump Height
+    [SerializeField] private float jumpCooldown = 0.5f; // cooldown for jump (maybe)
 
     [Header("Glider Turning Settings")]
-    [Range(10f, 50f)][SerializeField] private float turnSpeed = 3f; // Turning speed adjustable in the Inspector
+    [Range(10f, 50f)][SerializeField] private float turnSpeed = 3f; // Turning speed for A/D
 
 
     [Header("Glider Settings")]
@@ -24,19 +24,37 @@ public class WalkMovement : MonoBehaviour
     [SerializeField] private float maxSpeed = 20f; // Maximum speed the glider can reach when accelerating
 
 
+    [Header("Oxygen Settings")]
+    [SerializeField] public float OxygenGas = 3f; // maximum amount of Gas
+    [SerializeField] private float DepletedOxygen = 0f; // Tracks how long the boost has been held
+    [SerializeField] private float OxygenDepletionRate = 1f; // Controls how quickly oxygenGas depletes
+
+
     [Header("Glider Upward Settings")]
     [SerializeField] private float upwardVelocityIncreaseRate = 2f; // Rate of increase for upward velocity
-    [SerializeField] private float maxUpwardVelocity = 10f;
-    private float currentUpwardVelocity = 0f; // Tracks current upward velocity
+    [SerializeField] private float maxUpwardVelocity = 10f; // cap to the amount of velocity
+    [SerializeField] private float currentUpwardVelocity = 0f; // Tracks current upward velocity
+    
+
+
+    [Header("Glider Downward Settings")]
+    [SerializeField] private float downwardVelocityIncreaseRate = 5f; // Rate at which downward velocity increases
+    [SerializeField] private float maxDownwardVelocity = 10f; // Maximum downward velocity
+    [SerializeField] private float currentDownwardVelocity = 0f; // Tracks the current downward velocity
+
 
     [Header("Camera Settings")]
     [SerializeField] private Transform cameraTransform;
 
+
     [Header("Control State")]
     [SerializeField] private ControlState controlState;
 
+
     [Header("Glider Component")]
     [SerializeField] private GameObject glider; // Reference to the glider GameObject
+    public GameObject BoostTrail;
+
 
     private Rigidbody rb;
     private bool isGrounded = true;
@@ -233,6 +251,9 @@ public class WalkMovement : MonoBehaviour
         // Handle upward and downward movement separately
         HandleUpwardMovement();
 
+        // Handle upward and downaward movement separetely
+        HandleDownwardMovement();
+
         // Update the yaw rotation based on A/D input
         float yawChange = horizontal * turnSpeed * Time.deltaTime; // Smooth turning
         float newYaw = transform.eulerAngles.y + yawChange; // Add yaw change without clamping
@@ -244,24 +265,125 @@ public class WalkMovement : MonoBehaviour
         // Apply the combined velocity to Rigidbody
         rb.velocity = gliderVelocity;
 
-        // Visual tilting for banking motion (Z-axis tilt)
-        float tiltAngle = horizontal * 30f; // Adjust tilt sensitivity
-        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, -tiltAngle);
+        // Smooth visual tilting for banking motion (Z-axis tilt)
+        float targetTiltAngle = horizontal * 30f; // Target tilt angle based on input
+        float currentTiltAngle = transform.rotation.eulerAngles.z; // Current Z-axis tilt
+
+        // Adjust current angle to avoid jumps around 360 degrees
+        if (currentTiltAngle > 180f) currentTiltAngle -= 360f;
+
+        // Smoothly interpolate towards the target tilt angle
+        float smoothedTiltAngle = Mathf.Lerp(currentTiltAngle, -targetTiltAngle, Time.deltaTime * 5f);
+
+        // Apply the smoothed tilt angle
+        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, smoothedTiltAngle);
     }
 
-    private void HandleUpwardMovement()
+
+    public void HandleUpwardMovement()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) && OxygenGas > 0f)
         {
             // Increase upward velocity up to the maximum allowed
             currentUpwardVelocity = Mathf.Min(currentUpwardVelocity + upwardVelocityIncreaseRate * Time.deltaTime, maxUpwardVelocity);
+
+            // Decrease oxygenGas while boosting based on the depletion rate
+            OxygenGas -= OxygenDepletionRate * Time.deltaTime;
+
+            // Ensure oxygen doesn't go negative
+            OxygenGas = Mathf.Max(OxygenGas, 0f);
+
+            // Smoothly tilt the glider upward when boosting
+            float targetTiltAngle = -35f; // Tilt upwards by 15 degrees when boosting
+            float currentTiltAngle = transform.rotation.eulerAngles.x; // Current X-axis tilt
+
+            // Adjust current angle to avoid jumps around 360 degrees
+            if (currentTiltAngle > 180f) currentTiltAngle -= 360f;
+
+            // Smoothly interpolate towards the target tilt angle
+            float smoothedTiltAngle = Mathf.Lerp(currentTiltAngle, targetTiltAngle, Time.deltaTime * 3f);
+
+            // Apply the smoothed tilt angle while keeping other rotation axes unchanged
+            transform.rotation = Quaternion.Euler(smoothedTiltAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+
+            // Activate the Boost Trail
+            if (BoostTrail != null && !BoostTrail.activeSelf)
+            {
+                BoostTrail.SetActive(true);
+            }
         }
         else
         {
-            // Gradually reduce upward velocity when Spacebar is released
+            // Gradually reduce upward velocity
             currentUpwardVelocity = Mathf.Max(currentUpwardVelocity - upwardVelocityIncreaseRate * Time.deltaTime, 0f);
+
+            // Smoothly center the tilt back to neutral when not boosting
+            float currentTiltAngle = transform.rotation.eulerAngles.x; // Current X-axis tilt
+
+            // Adjust current angle to avoid jumps around 360 degrees
+            if (currentTiltAngle > 180f) currentTiltAngle -= 360f;
+
+            // Smoothly interpolate back to a neutral tilt (0 degrees)
+            float smoothedTiltAngle = Mathf.Lerp(currentTiltAngle, 0f, Time.deltaTime * 3f);
+
+            // Apply the smoothed tilt angle while keeping other rotation axes unchanged
+            transform.rotation = Quaternion.Euler(smoothedTiltAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+
+            // Deactivate the Boost Trail
+            if (BoostTrail != null && BoostTrail.activeSelf)
+            {
+                BoostTrail.SetActive(false);
+            }
         }
     }
+
+
+    public void HandleDownwardMovement()
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            currentDownwardVelocity = Mathf.Min(currentDownwardVelocity + downwardVelocityIncreaseRate * Time.deltaTime, maxDownwardVelocity);
+
+            // Apply the downward velocity to the position
+            transform.position += Vector3.down * currentDownwardVelocity * Time.deltaTime;
+
+
+            // Smoothly tilt the glider downward when moving down
+            float targetTiltAngle = 35f; // Tilt downward by 25 degrees
+            float currentTiltAngle = transform.rotation.eulerAngles.x; // Current X-axis tilt
+
+            // Adjust current angle to avoid jumps around 360 degrees
+            if (currentTiltAngle > 180f) currentTiltAngle -= 360f;
+
+            // Smoothly interpolate towards the target tilt angle
+            float smoothedTiltAngle = Mathf.Lerp(currentTiltAngle, targetTiltAngle, Time.deltaTime * 3f);
+
+            // Apply the smoothed tilt angle while keeping other rotation axes unchanged
+            transform.rotation = Quaternion.Euler(smoothedTiltAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+        }
+        else
+        {
+            // Gradually reduce the downward velocity when not descending
+            float downwardDeceleration = 3f; // Adjust as needed
+            currentDownwardVelocity = Mathf.Max(currentDownwardVelocity - downwardDeceleration * Time.deltaTime, 0f);
+
+            // Smoothly center the tilt back to neutral when not moving downward
+            float currentTiltAngle = transform.rotation.eulerAngles.x; // Current X-axis tilt
+
+            // Adjust current angle to avoid jumps around 360 degrees
+            if (currentTiltAngle > 180f) currentTiltAngle -= 360f;
+
+            // Smoothly interpolate back to a neutral tilt (0 degrees)
+            float smoothedTiltAngle = Mathf.Lerp(currentTiltAngle, 0f, Time.deltaTime * 3f);
+
+            // Apply the smoothed tilt angle while keeping other rotation axes unchanged
+            transform.rotation = Quaternion.Euler(smoothedTiltAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+        }
+    }
+
+
+
+
 
     private void ToggleGlider(bool activate)
     {
