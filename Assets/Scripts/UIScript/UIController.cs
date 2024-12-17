@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class UIController : MonoBehaviour
@@ -11,6 +10,12 @@ public class UIController : MonoBehaviour
 
     private int collectibleCount = 0;
     private Coroutine popupCoroutine;
+
+    void Start()
+    {
+        // Ensure the checkpoint popup is hidden on start
+        checkpointPopupText.gameObject.SetActive(false);
+    }
 
     // Increase the collectible count
     public void AddCollectible()

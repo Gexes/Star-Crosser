@@ -4,16 +4,15 @@ using UnityEngine;
 
 public class FallZone : MonoBehaviour
 {
+    [SerializeField] private RespawnManager respawnManager;
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            PlayerRespawn playerRespawn = other.GetComponent<PlayerRespawn>();
-            if (playerRespawn != null)
-            {
-                playerRespawn.Respawn();
-                Debug.Log("Player fell. Respawn triggered.");
-            }
+            // Call the Respawn method from the RespawnManager
+            respawnManager.Respawn();
         }
     }
 }
+
