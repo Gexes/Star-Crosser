@@ -23,6 +23,9 @@ public class WalkMovement : MonoBehaviour
     [SerializeField] private float minSpeed = 1f; // Minimum speed to prevent complete stop
     [SerializeField] private float maxSpeed = 20f; // Maximum speed the glider can reach when accelerating
 
+    [Header("Health Settings")]
+    [SerializeField] public int maxHealth = 100; // Maximum health value
+    public float currentHealth; // Monitors current health
 
     [Header("Oxygen Settings")]
     [SerializeField] public float OxygenGas = 3f; // maximum amount of Gas
@@ -84,6 +87,8 @@ public class WalkMovement : MonoBehaviour
         {
             glider.SetActive(false);
         }
+
+        currentHealth = maxHealth; // stanciating my health
     }
 
     private void Update()
@@ -119,6 +124,7 @@ public class WalkMovement : MonoBehaviour
         }
     }
 
+    // Handles the Groundfloor movement and animation for control //
     private void CheckGrounded()
     {
         isGrounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 0.6f);
@@ -189,7 +195,9 @@ public class WalkMovement : MonoBehaviour
         ChangeAnimation("IdleStill");
         isJumping = false;
     }
+    // End of Animation Ground code //
 
+    // This section handles the Ground & Glider movement code section //
     private void HandleMovement()
     {
         float moveX = Input.GetAxis("Horizontal");
@@ -337,7 +345,6 @@ public class WalkMovement : MonoBehaviour
         }
     }
 
-
     public void HandleDownwardMovement()
     {
         if (Input.GetKey(KeyCode.LeftShift))
@@ -380,11 +387,12 @@ public class WalkMovement : MonoBehaviour
             transform.rotation = Quaternion.Euler(smoothedTiltAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
         }
     }
+    // End of the Ground & Glider code section //
 
 
 
 
-
+    // This section handles the switch states between walking and gliding aswell as any animations with it //
     private void ToggleGlider(bool activate)
     {
         if (activate == isGliderActive) return;
@@ -435,4 +443,46 @@ public class WalkMovement : MonoBehaviour
         yield return new WaitForSeconds(jumpStartDuration);
         isJumping = false;
     }
+    // End of the switch state controls //
+
+    // This section handles the code for the health system //
+    private void HealthSystem()
+    {
+        // This function will handle the health logic
+        if (currentHealth <= 0)
+        {
+            Debug.Log("Player has died.");
+            // Add death logic here (e.g., respawn, game over screen)
+        }
+        else
+        {
+            Debug.Log($"Current Health: {currentHealth}");
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Check if the collided object has the tag "Hazard"
+        if (collision.gameObject.CompareTag("Hazard"))
+        {
+            int damage = 10; // Example damage value
+            TakeDamage(damage);
+        }
+    }
+
+    public void TakeDamage(float damageAmount)
+    {
+        currentHealth -= damageAmount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // making sure health doesn't go below 0
+
+        // Call the health system to handle further logic
+        HealthSystem();
+    }
+
+    private void Die()
+    {
+        Debug.Log("Player has died.");
+        // not to self, Implement death logic here
+    }
+    // End of the Health system code //
 }

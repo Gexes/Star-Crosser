@@ -29,7 +29,6 @@ public class CheckpointTrigger : MonoBehaviour
             uiController.ShowCheckpointPopup("Checkpoint Activated!");
         }
 
-        Debug.Log($"Checkpoint Activated at {checkpointData.position}");
     }
 }
 
