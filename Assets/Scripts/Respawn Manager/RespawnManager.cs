@@ -26,4 +26,20 @@ public class RespawnManager : MonoBehaviour
         checkpointData.position = transform.position;
     }
 
+    // Respawn player at a specific checkpoint based on its name
+    public void MainCheckPoint(string checkpointName)
+    {
+        CheckpointData specificCheckpoint = activeCheckpoints.Find(cp => cp.checkpointName == checkpointName);
+
+        if (specificCheckpoint != null && specificCheckpoint.isActive)
+        {
+            player.position = specificCheckpoint.position;
+            Debug.Log($"Player respawned at checkpoint: {checkpointName}");
+        }
+        else
+        {
+            Debug.LogWarning($"Checkpoint '{checkpointName}' not found or not active!");
+        }
+    }
+
 }

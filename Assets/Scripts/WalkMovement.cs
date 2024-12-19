@@ -25,7 +25,7 @@ public class WalkMovement : MonoBehaviour
 
     [Header("Health Settings")]
     [SerializeField] public int maxHealth = 100; // Maximum health value
-    public float currentHealth; // Monitors current health
+    [SerializeField] public float currentHealth; // Monitors current health
 
     [Header("Oxygen Settings")]
     [SerializeField] public float OxygenGas = 3f; // maximum amount of Gas
@@ -79,8 +79,8 @@ public class WalkMovement : MonoBehaviour
         animator = GetComponent<Animator>();
 
         // Lock and hide the cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = true;
 
         // Ensure the glider starts hidden
         if (glider != null)
@@ -93,6 +93,8 @@ public class WalkMovement : MonoBehaviour
 
     private void Update()
     {
+        
+
         if (Input.GetKeyDown(KeyCode.E))
         {
             ToggleGlider(!isGliderActive);
@@ -110,17 +112,18 @@ public class WalkMovement : MonoBehaviour
             HandleJump();
         }
 
-        // Unlock and relock the cursor
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-
-        if (Cursor.lockState == CursorLockMode.None && Input.GetMouseButtonDown(0))
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            if (Cursor.lockState == CursorLockMode.Locked)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
         }
     }
 
@@ -446,12 +449,13 @@ public class WalkMovement : MonoBehaviour
     // End of the switch state controls //
 
     // This section handles the code for the health system //
-    private void HealthSystem()
+    public void HealthSystem()
     {
         // This function will handle the health logic
         if (currentHealth <= 0)
         {
             Debug.Log("Player has died.");
+            Die();
             // Add death logic here (e.g., respawn, game over screen)
         }
         else
@@ -465,24 +469,44 @@ public class WalkMovement : MonoBehaviour
         // Check if the collided object has the tag "Hazard"
         if (collision.gameObject.CompareTag("Hazard"))
         {
-            int damage = 10; // Example damage value
+            int damage = 0; // Example damage value
             TakeDamage(damage);
         }
     }
+    // End of the Health System code //
 
-    public void TakeDamage(float damageAmount)
+    // Section for all Elements code //
+    public void TakeDamage(float amount)
     {
-        currentHealth -= damageAmount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // making sure health doesn't go below 0
+        currentHealth -= amount;
+        currentHealth = Mathf.Max(currentHealth, 0);
+        Debug.Log($"Took damage: {amount}. Health remaining: {currentHealth}");
 
-        // Call the health system to handle further logic
-        HealthSystem();
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
     }
 
-    private void Die()
+    public void TakeFireDamage(float amount)
+    {
+        currentHealth -= amount;
+        currentHealth = Mathf.Max(currentHealth, 0);
+        Debug.Log($"Took fire damage: {amount}. Health remaining: {currentHealth}");
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Die()
     {
         Debug.Log("Player has died.");
-        // not to self, Implement death logic here
     }
-    // End of the Health system code //
+    
+
+
+
+    // End of the Elements code //
 }

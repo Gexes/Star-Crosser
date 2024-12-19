@@ -7,5 +7,21 @@ public class DamageData : ScriptableObject
 {
     [Header("Damage Settings")]
     public float damageAmount; // The amount of damage this object deals
-    public string damageType;  // note "leave Blank", we can possibly implement Physical, Fire, stuff for damage categorization
+    public string damageType = "";  // "Default leave Blank", we can possibly implement Physical, Fire, stuff for damage categorization
+
+    [Header("Fire")]
+    public float fireTickDamage = 0f; // Amount of damage dealt per fire tick
+    public float fireDuration = 0f;    // Duration for fire damage
+    public float fireInterval = 1f;    // Interval between fire damage ticks
+
+
+
+
+
+
+
+
+
+
+
 }

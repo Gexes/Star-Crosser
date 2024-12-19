@@ -130,7 +130,7 @@ public class AudioManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"SpaceLog clip at index {index} is null.");
+               
             }
 
             // Trigger the Delay animation to handle the 15-second wait
