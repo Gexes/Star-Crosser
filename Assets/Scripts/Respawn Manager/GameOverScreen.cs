@@ -1,91 +1,94 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using DG.Tweening;
+using TMPro;
 public class GameOverScreen : MonoBehaviour
 {
+    [Header("Respawn Manager Reference")]
+    [SerializeField] private RespawnManager respawnManager; // Reference to the RespawnManager script
+
     [Header("Player Health Reference")]
     [SerializeField] private WalkMovement player; // Reference to the WalkMovement script
 
-    [Header("Animator Reference")]
-    [SerializeField] private Animator panelAnimator; // Reference to the Animator attached to the Game Over Panel
+    [Header("Game Over Panel Reference")]
+    [SerializeField] private RectTransform gameOverPanel; // Reference to the Game Over panel RectTransform
+
+
 
     private bool isGameOverTriggered = false; // Flag to prevent multiple triggers
 
     private void Start()
     {
-        // player reference is assigned
-        if (player == null)
-        {
-            
-        }
+        
 
-        // animator is set up
-        if (panelAnimator == null)
-        {
-            
-        }
     }
 
     private void Update()
     {
-        // Check if the player's health is 0
+        // Trigger Game Over only when health is 0 and it hasn't already been triggered
         if (player != null && player.currentHealth <= 0 && !isGameOverTriggered)
         {
             isGameOverTriggered = true; // Prevent further triggers
             TriggerGameOver();
+        }
+        // Reset the game over state if health is above 0
+        else if (player != null && player.currentHealth > 0)
+        {
+            isGameOverTriggered = false;
         }
 
     }
 
     private void TriggerGameOver()
     {
-        // Start the "SlideIn_Bottom" animation
-        if (panelAnimator != null)
-        {
-            
-        }
+        Cursor.visible = true;
 
-        // Start coroutine to play the next animation after the first one ends
-        StartCoroutine(PlaySlideInOpenAnimation());
-        PlaySlideOutBottomAnimation();
+        // Set the off-screen starting position (bottom of the canvas)
+        gameOverPanel.anchoredPosition = new Vector2(gameOverPanel.anchoredPosition.x, -1000f);
 
+        // Define the target position (middle of the screen)
+        Vector2 targetPosition = new Vector2(gameOverPanel.anchoredPosition.x, 540f);
+
+        // Use DOTween to animate the position
+        gameOverPanel.DOAnchorPos(targetPosition, 1f).SetEase(Ease.InOutQuad);
 
     }
 
-    private IEnumerator PlaySlideInOpenAnimation()
+    public void GamerOverFadeOut()
     {
-        // Wait for the "SlideIn_Bottom" animation to finish before triggering the next animation
-        yield return new WaitForSeconds(panelAnimator.GetCurrentAnimatorStateInfo(0).length);
+        Cursor.visible = false;
+        // Set the off-screen starting position (bottom of the canvas)
+        gameOverPanel.anchoredPosition = new Vector2(gameOverPanel.anchoredPosition.x, 540f);
 
-        // Trigger the "SlideIn_Open" animation
-        if (panelAnimator != null)
-        {
-            panelAnimator.SetTrigger("SlideIn_Open");
-        }
-    }
+        // Define the target position (middle of the screen)
+        Vector2 targetPosition = new Vector2(gameOverPanel.anchoredPosition.x, -1000f);
 
-    private IEnumerator PlaySlideOutBottomAnimation()
-    {
-        // Wait for the "SlideOut_Bottom" animation to finish before triggering the next animation
-        yield return new WaitForSeconds(panelAnimator.GetCurrentAnimatorStateInfo(0).length);
-
-        // Trigger the "SlideOut_Bottom" animation
-        if (panelAnimator != null)
-        {
-            panelAnimator.SetTrigger("SlideOut_Bottom");
-            Debug.Log($"animation is triggered");
-        }
+        // Use DOTween to animate the position
+        gameOverPanel.DOAnchorPos(targetPosition, 1f).SetEase(Ease.InOutQuad);
     }
 
     public void RevivePlayer()
     {
-        if (player != null)
+        player.currentHealth += 100; // Add 100 to the player's current health
+        player.currentHealth = Mathf.Min(player.currentHealth, player.maxHealth); // Ensure health doesn't exceed maxHealth
+        player.OxygenGas += 100;
+        player.OxygenGas = Mathf.Min(player.OxygenGas);
+        Debug.Log($"Player revived. Current Health: {player.currentHealth}, Current Oxygen: {player.OxygenGas}");
+
+        RespawnToMain();
+        GamerOverFadeOut();
+    }
+
+    public void RespawnToMain()
+    {
+        if (respawnManager)
         {
-            player.currentHealth += 100; // Add 100 to the player's current health
-            player.currentHealth = Mathf.Min(player.currentHealth, player.maxHealth); // Ensure health doesn't exceed maxHealth
-            isGameOverTriggered = false; // Reset the game over flag
-            Debug.Log($"Player revived. Current Health: {player.currentHealth}");
+            respawnManager.RespawnToMainCheckpoint();
+        }
+        else
+        {
+            Debug.LogWarning("RespawnManager is not assigned!");
         }
     }
 

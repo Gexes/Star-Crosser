@@ -29,7 +29,6 @@ public class WalkMovement : MonoBehaviour
 
     [Header("Oxygen Settings")]
     [SerializeField] public float OxygenGas = 3f; // maximum amount of Gas
-    [SerializeField] private float DepletedOxygen = 0f; // Tracks how long the boost has been held
     [SerializeField] private float OxygenDepletionRate = 1f; // Controls how quickly oxygenGas depletes
 
 
@@ -79,8 +78,8 @@ public class WalkMovement : MonoBehaviour
         animator = GetComponent<Animator>();
 
         // Lock and hide the cursor
-        //Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = false;
 
         // Ensure the glider starts hidden
         if (glider != null)
@@ -112,19 +111,6 @@ public class WalkMovement : MonoBehaviour
             HandleJump();
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (Cursor.lockState == CursorLockMode.Locked)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
-        }
     }
 
     // Handles the Groundfloor movement and animation for control //
@@ -454,9 +440,8 @@ public class WalkMovement : MonoBehaviour
         // This function will handle the health logic
         if (currentHealth <= 0)
         {
-            Debug.Log("Player has died.");
             Die();
-            // Add death logic here (e.g., respawn, game over screen)
+            
         }
         else
         {

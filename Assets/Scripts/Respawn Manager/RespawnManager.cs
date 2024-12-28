@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class RespawnManager : MonoBehaviour
 {
+    [Header("Main Checkpoint")]
+    [SerializeField] private Transform mainCheckpoint;// this is the one and main checkpoint
+
     [SerializeField] private CheckpointData checkpointData; // Reference to current checkpoint
     [SerializeField] private Transform player; // Player object
     private List<CheckpointData> activeCheckpoints = new List<CheckpointData>();
@@ -20,25 +23,37 @@ public class RespawnManager : MonoBehaviour
         }
 
     }
-    private void ActivateCheckpoint()
+    public void ActivateCheckpoint(CheckpointData checkpointData)
     {
-        checkpointData.isActive = true;
-        checkpointData.position = transform.position;
+        if (!activeCheckpoints.Contains(checkpointData))
+        {
+            activeCheckpoints.Add(checkpointData);
+            checkpointData.isActive = true;
+        }
     }
 
-    // Respawn player at a specific checkpoint based on its name
-    public void MainCheckPoint(string checkpointName)
+    // Reset any active checkpoints
+    public void ResetActiveCheckpoints()
     {
-        CheckpointData specificCheckpoint = activeCheckpoints.Find(cp => cp.checkpointName == checkpointName);
-
-        if (specificCheckpoint != null && specificCheckpoint.isActive)
+        foreach (var checkpoint in activeCheckpoints)
         {
-            player.position = specificCheckpoint.position;
-            Debug.Log($"Player respawned at checkpoint: {checkpointName}");
+            checkpoint.isActive = false;
+        }
+        activeCheckpoints.Clear();
+    }
+
+    // Respawns the player to main checkpoint while resetting all active checkpoints
+    public void RespawnToMainCheckpoint()
+    {
+        if (mainCheckpoint != null)
+        {
+            player.position = mainCheckpoint.position;
+            ResetActiveCheckpoints();
+            Debug.Log("Player respawned at the main checkpoint and active checkpoints reset.");
         }
         else
         {
-            Debug.LogWarning($"Checkpoint '{checkpointName}' not found or not active!");
+            Debug.LogWarning("Main checkpoint is not assigned!");
         }
     }
 

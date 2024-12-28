@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
-using DG.Tweening; // Using DoTween for animations
+using DG.Tweening; // Using DoTween for animations (use it or die)
 
 public class UIButtons : MonoBehaviour
 {

@@ -3273,7 +3273,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31a1d43819491bb45bad71d2f069f5fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneToLoad: StartLevel
+  sceneToLoad: Test Scene
   slideOutPanel: {fileID: 0}
   displayText: {fileID: 0}
   textToShow: 
