@@ -6340,7 +6340,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1067240710}
-  m_LocalRotation: {x: 0.003188764, y: 0.0000000012558623, z: -4.0046686e-12, w: 0.99999493}
+  m_LocalRotation: {x: 0.003188763, y: 7.236976e-10, z: -2.307712e-12, w: 0.99999493}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -14071,7 +14071,7 @@ MonoBehaviour:
   movementSpeed: 5
   jumpForce: 6
   jumpCooldown: 0
-  turnSpeed: 30
+  turnSpeed: 45
   glideSpeed: 10
   descendRate: 2
   accelerationRate: 10
@@ -14085,8 +14085,8 @@ MonoBehaviour:
   upwardVelocityIncreaseRate: 10
   maxUpwardVelocity: 50
   currentUpwardVelocity: 0
-  downwardVelocityIncreaseRate: 1
-  maxDownwardVelocity: 5
+  downwardVelocityIncreaseRate: 5
+  maxDownwardVelocity: 50
   currentDownwardVelocity: 0
   cameraTransform: {fileID: 176008049}
   controlState: {fileID: 11400000, guid: dd34686b7258d3c43be9e67af3a009ca, type: 2}

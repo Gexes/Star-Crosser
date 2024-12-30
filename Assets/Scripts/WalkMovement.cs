@@ -345,7 +345,7 @@ public class WalkMovement : MonoBehaviour
 
 
             // Smoothly tilt the glider downward when moving down
-            float targetTiltAngle = 35f; // Tilt downward by 25 degrees
+            float targetTiltAngle = 35f; // Tilt downward by "" degrees
             float currentTiltAngle = transform.rotation.eulerAngles.x; // Current X-axis tilt
 
             // Adjust current angle to avoid jumps around 360 degrees
@@ -360,7 +360,7 @@ public class WalkMovement : MonoBehaviour
         else
         {
             // Gradually reduce the downward velocity when not descending
-            float downwardDeceleration = 3f; // Adjust as needed
+            float downwardDeceleration = 10f; // Adjust as needed
             currentDownwardVelocity = Mathf.Max(currentDownwardVelocity - downwardDeceleration * Time.deltaTime, 0f);
 
             // Smoothly center the tilt back to neutral when not moving downward
