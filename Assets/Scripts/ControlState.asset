@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f65b504bb01b30d47ba16a3fac41567d, type: 3}
   m_Name: ControlState
   m_EditorClassIdentifier: 
-  isWalkingEnabled: 1
-  isGlidingEnabled: 0
+  isWalkingEnabled: 0
+  isGlidingEnabled: 1

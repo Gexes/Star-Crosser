@@ -398,7 +398,7 @@ public class WalkMovement : MonoBehaviour
         if (activate)
         {
             rb.useGravity = false;
-            rb.constraints = RigidbodyConstraints.FreezeRotationX;
+            rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 
             ChangeAnimation("Flying");
         }
