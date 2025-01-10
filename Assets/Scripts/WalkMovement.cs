@@ -79,7 +79,7 @@ public class WalkMovement : MonoBehaviour
 
         // Lock and hide the cursor
         Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = false;
+        Cursor.visible = true;
 
         // Ensure the glider starts hidden
         if (glider != null)

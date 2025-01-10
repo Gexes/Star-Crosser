@@ -62,7 +62,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   collectibleData: {fileID: 11400000, guid: 8f75f488578229d438931ff32bb5a254, type: 2}
-  uiController: {fileID: 0}
+  uiController: {fileID: 3217412662018092198, guid: d08b975c1f14ba946b339a04957350ca, type: 3}
 --- !u!1001 &3257242363588451831
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -5,5 +5,6 @@ public class CollectibleData : ScriptableObject
 {
     public string collectibleName;
     public Sprite collectibleIcon; // Icon to display in the inventory
-    public int value; // Optional: value for scoring or other purposes
+    public int value; // value for scoring
+    public AudioClip collectibleSound; // Audio that plays
 }

@@ -140,8 +140,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2d99ec2ebad8e24183a003ed2d4af05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collectibleData: {fileID: 0}
-  uiController: {fileID: 0}
+  collectibleData: {fileID: 11400000, guid: 5fa42188ff549264faa89a410f9d0edb, type: 2}
+  uiController: {fileID: 3217412662018092198, guid: d08b975c1f14ba946b339a04957350ca, type: 3}
 --- !u!222 &2191070563579083017
 CanvasRenderer:
   m_ObjectHideFlags: 0

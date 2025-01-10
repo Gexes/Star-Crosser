@@ -20,6 +20,7 @@ public class UIController : MonoBehaviour
     public GameObject inventoryItemPrefab; // Prefab for inventory
 
 
+
     void Start()
     {
         // Ensure the checkpoint popup is hidden on start
