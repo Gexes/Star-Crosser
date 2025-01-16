@@ -64,6 +64,7 @@ public class UIController : MonoBehaviour
         checkpointPopupText.gameObject.SetActive(false); // Hide the popup
     }
 
+    // Note to self, add popup collectible and description of item here //
     public void AddCollectibleToInventory(CollectibleData collectibleData)
     {
         if (inventoryPanel == null || inventoryItemPrefab == null)
